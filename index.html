@@ -334,6 +334,10 @@
             <span id="volStatus">Conforme DALI (5–50 L, opt. 15 L)</span>
             <span id="concreteTopReadout" style="font-family:monospace;">Béton haut : 150 mm</span>
           </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.80rem; margin-top:6px; font-family:monospace; color:var(--text);">
+            <span>H enceinte : 102 mm (108 HT)</span>
+            <span id="boxHeightReadout">H totale boîte : 150 mm</span>
+          </div>
         </div>
 
         <div class="slider-group">
@@ -382,24 +386,19 @@
           </thead>
           <tbody>
             <tr>
-              <td>Découpe feuillure béton</td>
+              <td>Hauteur enceinte K-60</td>
+              <td><code>102 mm</code> encastrés (<code>108 mm</code> HT)</td>
+              <td>Profondeur d'encastrement <code>102 mm</code> + saillie grille aimantée <code>6 mm</code> (<code>Ø 265 mm</code> ; collerette <code>Ø 242 mm</code>).</td>
+            </tr>
+            <tr>
+              <td>Découpe &amp; pattes <em>dogleg</em></td>
               <td><code>Ø 223 mm × 50 mm</code></td>
-              <td>Collerette K-60 <code>Ø 242 mm</code> + grille aimantée <code>Ø 265 × 6 mm</code> en sous-face.</td>
+              <td><strong>Retourner les 4 pattes</strong> sur leurs vis (plage DALI <code>29–65 mm</code>, § 4.1) pour serrer la feuillure béton de <code>50 mm</code>.</td>
             </tr>
             <tr>
-              <td>4 pattes <em>dogleg</em> K-60</td>
-              <td>Plage <code>29 – 65 mm</code></td>
-              <td><strong>Retourner les 4 pattes</strong> sur leurs vis avant pose (manuel DALI § 4.1) pour serrer les <code>50 mm</code> de béton.</td>
-            </tr>
-            <tr>
-              <td>Enceinte + réserve fond</td>
-              <td><code>102 + 80 = 182 mm</code></td>
-              <td>8 cm libres derrière l'aimant ; laine acoustique (Dacron) sous le couvercle supérieur.</td>
-            </tr>
-            <tr>
-              <td>Boîte cylindrique bois</td>
-              <td><code>H int 132 mm</code> + fond <code>18 mm</code></td>
-              <td>CP marine CTBX / MDF hydrofuge résiné époxy, posée à <code>Z = 50 mm</code> (reste <code>150 mm</code> de béton au-dessus).</td>
+              <td>Hauteur totale boîte bois</td>
+              <td><code>150 mm</code> (<code>int. 132 + fond 18</code>)</td>
+              <td>De <code>Z = 50 mm</code> à <code>Z = 200 mm</code> : ménage <code>80 mm</code> derrière l'enceinte et laisse <code>150 mm</code> de béton plein au-dessus.</td>
             </tr>
           </tbody>
         </table>
@@ -719,25 +718,66 @@
 
       overlaySvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
       if (!state.layers.labels || state.explodePct > 25) { overlaySvg.innerHTML = ''; return; }
-      const rCut=state.cutoutDia/2, rWoodIn=state.woodInnerDia/2, zCavTop=state.mountingDepth+state.rearClearance;
-      const pins = [
-        { anchor: [-state.slabWidth*0.42, 0, state.slabThickness*0.52], offset: [-20,-12], align:'end', text:`Plafond béton ${state.slabThickness} mm` },
-        { anchor: [-rCut-14, 0, state.rebateThick*0.5], offset: [-28,10], align:'end', text:`Feuillure béton ${state.rebateThick} mm (Ø ${state.cutoutDia})` },
-        { anchor: [121*Math.SQRT1_2, -121*Math.SQRT1_2, state.rebateThick+5], offset: [30,14], align:'start', text:`Patte dogleg sur feuillure` },
-        { anchor: [rWoodIn+state.woodThick*0.5, 0, (state.rebateThick+zCavTop)*0.55], offset: [26,-6], align:'start', text:`Boîte bois Ø int ${state.woodInnerDia} mm` },
-        { anchor: [0, 0, state.mountingDepth+state.rearClearance*0.5], offset: [36,-16], align:'start', text:`Vide arrière +${state.rearClearance} mm` }
-      ];
+      const rCut=state.cutoutDia/2, rWoodIn=state.woodInnerDia/2, rWoodOut=rWoodIn+state.woodThick;
+      const zRebate=state.rebateThick, zCavTop=state.mountingDepth+state.rearClearance;
+      const zWoodTop=Math.min(state.slabThickness-15, zCavTop+state.woodThick);
+      const hBoxTotal=Math.round(zWoodTop - zRebate), hBoxInner=Math.round(zCavTop - zRebate);
+
       let html = '';
+      function drawDim3D(refA, refB, dimA, dimB, labelText, align, strokeCol, dxPx=0, dyPx=0) {
+        const sRefA=projectPoint(mvp,refA[0],refA[1],refA[2],w,h), sRefB=projectPoint(mvp,refB[0],refB[1],refB[2],w,h);
+        const sDimA=projectPoint(mvp,dimA[0],dimA[1],dimA[2],w,h), sDimB=projectPoint(mvp,dimB[0],dimB[1],dimB[2],w,h);
+        if (!sRefA || !sRefB || !sDimA || !sDimB) return;
+        const ux=sDimB.x-sDimA.x, uy=sDimB.y-sDimA.y, ul=Math.hypot(ux,uy)||1;
+        const nx=(-uy/ul)*4.5, ny=(ux/ul)*4.5;
+        html += `<line x1="${sRefA.x}" y1="${sRefA.y}" x2="${sDimA.x}" y2="${sDimA.y}" stroke="${strokeCol}" stroke-opacity="0.55" stroke-dasharray="2,2"/>
+          <line x1="${sRefB.x}" y1="${sRefB.y}" x2="${sDimB.x}" y2="${sDimB.y}" stroke="${strokeCol}" stroke-opacity="0.55" stroke-dasharray="2,2"/>
+          <line x1="${sDimA.x}" y1="${sDimA.y}" x2="${sDimB.x}" y2="${sDimB.y}" stroke="${strokeCol}" stroke-width="1.7"/>
+          <line x1="${sDimA.x-nx}" y1="${sDimA.y-ny}" x2="${sDimA.x+nx}" y2="${sDimA.y+ny}" stroke="${strokeCol}" stroke-width="1.7"/>
+          <line x1="${sDimB.x-nx}" y1="${sDimB.y-ny}" x2="${sDimB.x+nx}" y2="${sDimB.y+ny}" stroke="${strokeCol}" stroke-width="1.7"/>`;
+        const mx=(sDimA.x+sDimB.x)*0.5+dxPx, my=(sDimA.y+sDimB.y)*0.5+dyPx;
+        const bw=labelText.length*6.6+14;
+        const rawBx = align==='end' ? mx-bw : (align==='middle' ? mx-bw*0.5 : mx);
+        const bx=Math.max(6, Math.min(w-bw-6, rawBx));
+        const by=Math.max(6, Math.min(h-24, my-10.5));
+        html += `<rect x="${bx}" y="${by}" width="${bw}" height="21" rx="5" fill="var(--bg)" fill-opacity="0.92" stroke="${strokeCol}" stroke-width="1.2"/>
+          <text x="${bx+7}" y="${by+14.5}" fill="var(--text)" font-size="11.5" font-family="monospace">${labelText}</text>`;
+      }
+
+      if (state.layers.wood) {
+        drawDim3D([rWoodOut,0,zRebate],[rWoodOut,0,zWoodTop],[rWoodOut+26,0,zRebate],[rWoodOut+26,0,zWoodTop],
+          `H totale boîte : ${hBoxTotal} mm (int. ${hBoxInner})`, 'start', '#d97706', 8, 24);
+      }
+      if (state.layers.speaker) {
+        const zBotSpk = state.layers.grille ? -state.grilleProtrusion : 0;
+        const hSpkLabel = state.layers.grille ? `H enceinte : 108 mm HT (102 enc.)` : `H enceinte : 102 mm`;
+        drawDim3D([-62,-22,zBotSpk],[-62,-22,state.mountingDepth],[-98,-36,zBotSpk],[-98,-36,state.mountingDepth],
+          hSpkLabel, 'end', '#3b82f6', -8, -4);
+      }
+      if (state.layers.concrete) {
+        drawDim3D([-state.slabWidth*0.5,0,0],[-state.slabWidth*0.5,0,state.slabThickness],
+          [-state.slabWidth*0.5-18,0,0],[-state.slabWidth*0.5-18,0,state.slabThickness],
+          `Plafond béton : ${state.slabThickness} mm`, 'start', 'var(--muted)', 6, -18);
+      }
+      if (state.layers.wood && state.layers.speaker) {
+        drawDim3D([24,0,state.mountingDepth],[24,0,zCavTop],[46,0,state.mountingDepth],[46,0,zCavTop],
+          `Vide arrière : +${state.rearClearance} mm`, 'middle', '#22c55e', -16, -16);
+      }
+
+      const pins = [];
+      if (state.layers.concrete) pins.push({ anchor: [-rCut-14, 0, zRebate*0.5], offset: [-22,28], align:'end', text:`Feuillure béton ${zRebate} mm (Ø ${state.cutoutDia})` });
+      if (state.layers.wood) pins.push({ anchor: [rWoodIn*0.65, 30, zCavTop-4], offset: [20,-26], align:'start', text:`Ø int bois ${state.woodInnerDia} mm` });
+
       for (const p of pins) {
         const sc = projectPoint(mvp, p.anchor[0], p.anchor[1], p.anchor[2], w, h);
         if (!sc || sc.x<12 || sc.x>w-12 || sc.y<12 || sc.y>h-12) continue;
         const lx = Math.max(10, Math.min(w-10, sc.x+p.offset[0]));
         const ly = Math.max(18, Math.min(h-14, sc.y+p.offset[1]));
         const bw = p.text.length * 6.5 + 14;
-        const bx = p.align === 'end' ? lx - bw : lx;
+        const bx = Math.max(6, Math.min(w-bw-6, p.align === 'end' ? lx - bw : lx));
         html += `<line x1="${sc.x}" y1="${sc.y}" x2="${lx}" y2="${ly}" stroke="var(--text)" stroke-opacity="0.5" stroke-dasharray="2,2"/>
-          <circle cx="${sc.x}" cy="${sc.y}" r="3.5" fill="var(--primary)" stroke="var(--bg)" stroke-width="1.3"/>
-          <rect x="${bx}" y="${ly-11}" width="${bw}" height="21" rx="5" fill="var(--bg)" fill-opacity="0.88" stroke="var(--border)"/>
+          <circle cx="${sc.x}" cy="${sc.y}" r="3.2" fill="var(--primary)" stroke="var(--bg)" stroke-width="1.3"/>
+          <rect x="${bx}" y="${ly-11}" width="${bw}" height="21" rx="5" fill="var(--bg)" fill-opacity="0.9" stroke="var(--border)"/>
           <text x="${bx+7}" y="${ly+3.5}" fill="var(--text)" font-size="11.5" font-family="monospace">${p.text}</text>`;
       }
       overlaySvg.innerHTML = html;
@@ -746,25 +786,29 @@
     function renderBlueprint2D() {
       const w = wrap.clientWidth || 720, h = wrap.clientHeight || 540;
       blueprintSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      const scale = Math.min((w - 170) / 560, (h - 80) / 395);
-      const cx = w * 0.5, yZero = h - 46;
+      const rCut=state.cutoutDia/2, rWoodIn=state.woodInnerDia/2, rWoodOut=rWoodIn+state.woodThick, rCond=state.conduitDia/2;
+      const halfW = Math.max(225, rWoodOut + 22);
+      const scale = Math.min((w - 325) / (2 * halfW + 28), (h - 80) / 395);
+      const cx = w * 0.42, yZero = h - 46;
       const sx = (x) => cx + x * scale, sy = (z) => yZero - z * scale;
-      const halfW=260, rCut=state.cutoutDia/2, rWoodIn=state.woodInnerDia/2, rWoodOut=rWoodIn+state.woodThick, rCond=state.conduitDia/2;
       const z1=state.rebateThick, zCav=state.mountingDepth+state.rearClearance, zTop=Math.min(state.slabThickness-15,zCav+state.woodThick), zSlab=state.slabThickness;
+      const hBoxTotal=Math.round(zTop - z1), hBoxInner=Math.round(zCav - z1);
 
-      const dimV = (xMm,za,zb,lbl,side=1) => {
+      const dimV = (xMm,za,zb,lbl,side=1,col='var(--primary)',refX=null) => {
         const x=sx(xMm), ya=sy(za), yb=sy(zb);
-        return `<line x1="${x}" y1="${ya}" x2="${x}" y2="${yb}" stroke="var(--primary)" stroke-width="1.3"/>
-          <line x1="${x-4}" y1="${ya}" x2="${x+4}" y2="${ya}" stroke="var(--primary)" stroke-width="1.3"/>
-          <line x1="${x-4}" y1="${yb}" x2="${x+4}" y2="${yb}" stroke="var(--primary)" stroke-width="1.3"/>
-          <text x="${x+side*7}" y="${(ya+yb)/2+4}" text-anchor="${side>0?'start':'end'}" fill="var(--text)" font-size="12" font-family="monospace">${lbl}</text>`;
+        const ext = refX!==null ? `<line x1="${sx(refX)}" y1="${ya}" x2="${x}" y2="${ya}" stroke="${col}" stroke-opacity="0.45" stroke-dasharray="2,2"/>
+          <line x1="${sx(refX)}" y1="${yb}" x2="${x}" y2="${yb}" stroke="${col}" stroke-opacity="0.45" stroke-dasharray="2,2"/>` : '';
+        return `${ext}<line x1="${x}" y1="${ya}" x2="${x}" y2="${yb}" stroke="${col}" stroke-width="1.4"/>
+          <line x1="${x-4}" y1="${ya}" x2="${x+4}" y2="${ya}" stroke="${col}" stroke-width="1.4"/>
+          <line x1="${x-4}" y1="${yb}" x2="${x+4}" y2="${yb}" stroke="${col}" stroke-width="1.4"/>
+          <text x="${x+side*7}" y="${(ya+yb)/2+4}" text-anchor="${side>0?'start':'end'}" fill="var(--text)" font-size="11.5" font-family="monospace">${lbl}</text>`;
       };
       const dimH = (xa,xb,zMm,lbl,yOff=-7) => {
         const x1=sx(xa), x2=sx(xb), y=sy(zMm);
         return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--primary)" stroke-width="1.3"/>
           <line x1="${x1}" y1="${y-4}" x2="${x1}" y2="${y+4}" stroke="var(--primary)" stroke-width="1.3"/>
           <line x1="${x2}" y1="${y-4}" x2="${x2}" y2="${y+4}" stroke="var(--primary)" stroke-width="1.3"/>
-          <text x="${(x1+x2)/2}" y="${y+yOff}" text-anchor="middle" fill="var(--text)" font-size="12" font-family="monospace">${lbl}</text>`;
+          <text x="${(x1+x2)/2}" y="${y+yOff}" text-anchor="middle" fill="var(--text)" font-size="11.5" font-family="monospace">${lbl}</text>`;
       };
       const pathSide = (s) => `M ${sx(s*halfW)} ${sy(0)} L ${sx(s*rCut)} ${sy(0)} L ${sx(s*rCut)} ${sy(z1)} L ${sx(s*rWoodOut)} ${sy(z1)} L ${sx(s*rWoodOut)} ${sy(zTop)} L ${sx(s*rCond)} ${sy(zTop)} L ${sx(s*rCond)} ${sy(zSlab)} L ${sx(s*halfW)} ${sy(zSlab)} Z`;
 
@@ -781,16 +825,17 @@
         <rect x="${sx(-state.basketDia/2)}" y="${sy(72)}" width="${state.basketDia*scale}" height="${72*scale}" rx="2" fill="#2e3238" stroke="var(--text)"/>
         <rect x="${sx(-62)}" y="${sy(102)}" width="${124*scale}" height="${30*scale}" rx="2" fill="#464b53" stroke="var(--text)"/>
         <rect x="${sx(-state.bezelDia/2)}" y="${sy(0)}" width="${state.bezelDia*scale}" height="${4*scale}" fill="#23262b"/>
-        <rect x="${sx(-state.grilleDia/2)}" y="${sy(-3.5)}" width="${state.grilleDia*scale}" height="${2.5*scale}" fill="#f1f3f5" stroke="#868e96"/>
+        <rect x="${sx(-state.grilleDia/2)}" y="${sy(-6)}" width="${state.grilleDia*scale}" height="${6*scale}" fill="#f1f3f5" stroke="#868e96"/>
         <rect x="${sx(-127.5)}" y="${sy(z1+8)}" width="${27.5*scale}" height="${8*scale}" fill="#dfb43b" stroke="#8c6d1f"/>
         <rect x="${sx(100)}" y="${sy(z1+8)}" width="${27.5*scale}" height="${8*scale}" fill="#dfb43b" stroke="#8c6d1f"/>
-        ${dimV(-halfW-16, 0, zSlab, `${zSlab} mm (béton)`, -1)}
-        ${dimV(-rCut+14, 0, z1, `${z1} mm`, 1)}
-        ${dimV(0, 102, zCav, `+${state.rearClearance} mm`, 1)}
-        ${dimV(halfW+16, 0, 102, `102 mm (K-60)`, 1)}
-        ${dimV(halfW+16, zTop, zSlab, `${Math.round(zSlab-zTop)} mm`, 1)}
-        ${dimH(-rWoodIn, rWoodIn, zCav-22, `Ø int bois ${state.woodInnerDia} mm`, -6)}
-        ${dimH(-rCut, rCut, -22, `Découpe Ø ${state.cutoutDia} mm (Grille Ø 265)`, 15)}`;
+        ${dimV(-halfW-12, 0, zSlab, `Dalle ${zSlab} mm`, -1, 'var(--muted)', -halfW)}
+        ${dimV(rCut-10, 0, z1, `Feuillure ${z1} mm`, -1, 'var(--primary)')}
+        ${dimV(-86, -6, 102, `H enceinte 108 HT (102)`, 1, '#3b82f6')}
+        ${dimV(14, 102, zCav, `Vide +${state.rearClearance} mm`, 1, '#22c55e')}
+        ${dimV(halfW+12, z1, zTop, `H totale boîte ${hBoxTotal} mm (int.${hBoxInner})`, 1, '#d97706', rWoodOut)}
+        ${dimV(halfW+12, zTop, zSlab, `Béton haut ${Math.round(zSlab-zTop)} mm`, 1, 'var(--muted)', halfW)}
+        ${dimH(-rWoodIn, rWoodIn, zCav-20, `Ø int bois ${state.woodInnerDia} mm`, -6)}
+        ${dimH(-rCut, rCut, -24, `Découpe Ø ${state.cutoutDia} mm · Grille Ø ${state.grilleDia} mm`, 15)}`;
     }
 
     function updateReadouts() {
@@ -812,7 +857,10 @@
       if (netL < 5.0) { volBar.style.background = 'var(--warning)'; volStatus.textContent = 'Sous le min. DALI (5 L)'; }
       else if (Math.abs(netL - 15.0) <= 2.0) { volBar.style.background = 'var(--success)'; volStatus.textContent = 'Optimum DALI atteint (~15 L)'; }
       else { volBar.style.background = 'var(--success)'; volStatus.textContent = 'Conforme DALI (5–50 L, opt. 15 L)'; }
-      document.getElementById('concreteTopReadout').textContent = `Béton haut : ${Math.round(state.slabThickness - (zCavTop + state.woodThick))} mm`;
+      const zWoodTop = Math.min(state.slabThickness - 15, zCavTop + state.woodThick);
+      document.getElementById('concreteTopReadout').textContent = `Béton haut : ${Math.round(state.slabThickness - zWoodTop)} mm`;
+      const boxEl = document.getElementById('boxHeightReadout');
+      if (boxEl) boxEl.textContent = `H totale boîte : ${Math.round(zWoodTop - state.rebateThick)} mm`;
     }
 
     function downloadBlob(blob, filename) {
@@ -847,17 +895,21 @@
     }
     function exportScad() {
       const zCav = state.mountingDepth + state.rearClearance;
-      const scad = `// OpenSCAD — Encastrement DALI PHANTOM K-60 (mm)\n$fn = 120;\nep_beton = ${state.slabThickness};\nep_feuillure = ${state.rebateThick};\nd_decoupe = ${state.cutoutDia};\nd_int_bois = ${state.woodInnerDia};\nep_bois = ${state.woodThick};\nz_cav = ${zCav};\n\ndifference() {\n  union() {\n    color([0.68,0.70,0.72]) difference() {\n      translate([-300,-300,0]) cube([600,600,ep_beton]);\n      translate([0,0,-1]) cylinder(d=d_decoupe, h=ep_feuillure+2);\n      translate([0,0,ep_feuillure]) cylinder(d=d_int_bois+2*ep_bois, h=z_cav+ep_bois-ep_feuillure);\n      translate([0,0,z_cav]) cylinder(d=25, h=ep_beton);\n    }\n    color([0.78,0.55,0.33]) difference() {\n      translate([0,0,ep_feuillure]) cylinder(d=d_int_bois+2*ep_bois, h=z_cav+ep_bois-ep_feuillure);\n      translate([0,0,ep_feuillure-1]) cylinder(d=d_int_bois, h=z_cav-ep_feuillure+1);\n      translate([0,0,z_cav-1]) cylinder(d=25, h=ep_bois+2);\n    }\n  }\n  translate([-400,-400,-20]) cube([800,400,ep_beton+40]);\n}\n`;
+      const scad = `// OpenSCAD — Encastrement DALI PHANTOM K-60 (mm)\n$fn = 120;\nep_beton = ${state.slabThickness};\nep_feuillure = ${state.rebateThick};\nd_decoupe = ${state.cutoutDia};\nd_int_bois = ${state.woodInnerDia};\nep_bois = ${state.woodThick};\nz_cav = ${zCav};\nh_enceinte = ${state.mountingDepth}; // 108 mm HT avec grille 6 mm\nh_totale_boite = ${zCav + state.woodThick - state.rebateThick};\n\ndifference() {\n  union() {\n    color([0.68,0.70,0.72]) difference() {\n      translate([-300,-300,0]) cube([600,600,ep_beton]);\n      translate([0,0,-1]) cylinder(d=d_decoupe, h=ep_feuillure+2);\n      translate([0,0,ep_feuillure]) cylinder(d=d_int_bois+2*ep_bois, h=z_cav+ep_bois-ep_feuillure);\n      translate([0,0,z_cav]) cylinder(d=25, h=ep_beton);\n    }\n    color([0.78,0.55,0.33]) difference() {\n      translate([0,0,ep_feuillure]) cylinder(d=d_int_bois+2*ep_bois, h=z_cav+ep_bois-ep_feuillure);\n      translate([0,0,ep_feuillure-1]) cylinder(d=d_int_bois, h=z_cav-ep_feuillure+1);\n      translate([0,0,z_cav-1]) cylinder(d=25, h=ep_bois+2);\n    }\n  }\n  translate([-400,-400,-20]) cube([800,400,ep_beton+40]);\n}\n`;
       downloadBlob(new Blob([scad],{type:'text/plain'}), `dali_k60_${state.woodInnerDia}mm.scad`);
     }
     function exportDxf() {
       const rIn = state.woodInnerDia/2, rOut = rIn + state.woodThick, rCond = state.conduitDia/2;
+      const zCav = state.mountingDepth + state.rearClearance, zTop = Math.min(state.slabThickness - 15, zCav + state.woodThick);
+      const hBox = Math.round(zTop - state.rebateThick), hBoxIn = Math.round(zCav - state.rebateThick);
       const dxf = ['0','SECTION','2','ENTITIES',
         '0','CIRCLE','8','ANNEAU_BOIS','10','0','20','0','30','0','40',rOut.toFixed(2),
         '0','CIRCLE','8','ANNEAU_BOIS','10','0','20','0','30','0','40',rIn.toFixed(2),
         '0','CIRCLE','8','FOND_BOIS','10',(rOut*2.5).toFixed(2),'20','0','30','0','40',rOut.toFixed(2),
         '0','CIRCLE','8','FOND_BOIS','10',(rOut*2.5).toFixed(2),'20','0','30','0','40',rCond.toFixed(2),
         '0','CIRCLE','8','DECOUPE_BETON','10','0','20',(rOut*2.5).toFixed(2),'30','0','40',(state.cutoutDia/2).toFixed(2),
+        '0','TEXT','8','COTES','10','0','20',(-rOut-25).toFixed(2),'30','0','40','8','1',`H ENCEINTE K-60 = ${state.mountingDepth} mm (108 mm HT avec grille)`,
+        '0','TEXT','8','COTES','10','0','20',(-rOut-40).toFixed(2),'30','0','40','8','1',`H TOTALE BOITE BOIS = ${hBox} mm (int. ${hBoxIn} mm + couvercle ${state.woodThick} mm)`,
         '0','ENDSEC','0','EOF'].join('\n');
       downloadBlob(new Blob([dxf],{type:'application/dxf'}), `usinage_cnc_dali_k60_${state.woodInnerDia}mm.dxf`);
     }

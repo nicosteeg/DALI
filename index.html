@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Encastrement Plafond Béton DALI PHANTOM K-60 — Modèle 3D & Plans CAO</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg: #0f1217;
+      --surface: #171b22;
+      --surface-2: #1f2530;
+      --border: #2c3444;
+      --text: #eef2f7;
+      --muted: #9aa6b8;
+      --primary: #3b82f6;
+      --primary-fg: #ffffff;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    [data-theme="light"] {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --surface-2: #eef2f6;
+      --border: #d5dce6;
+      --text: #141923;
+      --muted: #5a6679;
+      --primary: #2563eb;
+      --primary-fg: #ffffff;
+      --success: #16a34a;
+      --warning: #d97706;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-size: 1.35rem;
+      margin: 0;
+      font-weight: 700;
+    }
+    .subtitle {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    button, .btn-link {
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 6px 11px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    button:hover, .btn-link:hover {
+      border-color: var(--primary);
+    }
+    button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-fg);
+    }
+    button.accent {
+      background: var(--surface-2);
+      border-color: var(--primary);
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+      align-items: stretch;
+    }
+    @media (max-width: 960px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+    .viewport-card {
+      position: relative;
+      height: 540px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      user-select: none;
+    }
+    @media (max-width: 640px) {
+      .viewport-card { height: 400px; }
+    }
+    #glCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #glCanvas:active { cursor: grabbing; }
+    #overlaySvg, #blueprintSvg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #overlaySvg { pointer-events: none; }
+    .hidden { display: none !important; }
+    .badge-bar {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--bg) 84%, transparent);
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      pointer-events: none;
+    }
+    .hint-bar {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
+      border: 1px solid var(--border);
+      font-size: 0.76rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .meter-box {
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .meter-track {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      margin: 7px 0;
+    }
+    .meter-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--success);
+      transition: width 0.15s;
+    }
+    .meter-opt {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 30%;
+      width: 2px;
+      background: var(--text);
+      opacity: 0.7;
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    .slider-row label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+    .slider-row label strong {
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .layers-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .layer-btn.on {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 18%, var(--surface));
+    }
+    .grid-bottom {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 960px) {
+      .grid-bottom { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .card h2 {
+      font-size: 1rem;
+      margin: 0 0 10px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--muted); font-weight: 600; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: var(--surface-2);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+    }
+    .dl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Modèle 3D — Encastrement Plafond Béton DALI PHANTOM K-60</h1>
+        <div class="subtitle">Dalle béton 35 cm · Feuillure cylindrique béton 5 cm (Ø 223 mm) · Boîte arrière cylindrique en bois (+8 cm de réserve)</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="btnTheme">Thème Clair / Sombre</button>
+        <button id="btnExportSTL" class="accent">⬇ Exporter STL (paramètres actuels)</button>
+        <button id="btnExportOBJ" class="accent">⬇ Exporter OBJ</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <button id="btnModeCut3D" class="active">Coupe 3D (180°)</button>
+      <button id="btnModeFull3D">Modèle 3D 360°</button>
+      <button id="btnModeExploded">Vue éclatée</button>
+      <button id="btnModeBelow">Vue sous plafond</button>
+      <button id="btnMode2D">Plan de coupe 2D coté</button>
+      <span style="flex:1"></span>
+      <button id="btnPreset300">Variante Compacte : Ø int 300 mm (~9,5 L)</button>
+      <button id="btnPreset380">Optimum Acoustique DALI : Ø int 380 mm (~15,1 L)</button>
+    </div>
+
+    <div class="workspace">
+      <div id="viewportWrap" class="viewport-card">
+        <canvas id="glCanvas"></canvas>
+        <svg id="overlaySvg"></svg>
+        <svg id="blueprintSvg" class="hidden"></svg>
+        <div id="hintBar" class="hint-bar">Clic gauche : orbiter · Molette : zoomer · Maj + Clic : déplacer</div>
+        <div id="legendBar" class="badge-bar">
+          <span><i class="swatch" style="background:#9aa1a8"></i>Dalle béton 35 cm &amp; feuillure 5 cm</span>
+          <span><i class="swatch" style="background:#c88d55"></i>Boîte cylindrique bois</span>
+          <span><i class="swatch" style="background:#7a332b"></i>Enceinte DALI K-60</span>
+          <span><i class="swatch" style="background:#dfb43b"></i>4 pattes dogleg retournées</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="meter-box">
+          <div style="display:flex; justify-content:space-between; font-size:0.86rem;">
+            <span style="color:var(--muted)">Volume acoustique net</span>
+            <strong id="volReadout" style="font-family:monospace; font-size:1rem;">9,5 L</strong>
+          </div>
+          <div class="meter-track">
+            <div id="volBar" class="meter-fill" style="width:20%"></div>
+            <div class="meter-opt" title="Optimum DALI : 15 L"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--muted);">
+            <span id="volStatus">Conforme DALI (5–50 L, opt. 15 L)</span>
+            <span id="concreteTopReadout" style="font-family:monospace;">Béton haut : 150 mm</span>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-row">
+            <label><span>Ø intérieur boîte bois</span><strong id="valWoodDia">300 mm</strong></label>
+            <input id="slWoodDia" type="range" min="256" max="420" step="2" value="300" />
+          </div>
+          <div class="slider-row">
+            <label><span>Vide libre derrière l'enceinte</span><strong id="valRearClear">80 mm</strong></label>
+            <input id="slRearClear" type="range" min="30" max="150" step="5" value="80" />
+          </div>
+          <div class="slider-row">
+            <label><span>Épaisseur feuillure béton</span><strong id="valRebate">50 mm</strong></label>
+            <input id="slRebate" type="range" min="15" max="65" step="1" value="50" />
+          </div>
+          <div class="slider-row">
+            <label><span>Épaisseur paroi &amp; fond bois</span><strong id="valWoodWall">18 mm</strong></label>
+            <input id="slWoodWall" type="range" min="12" max="25" step="1" value="18" />
+          </div>
+          <div class="slider-row">
+            <label><span>Ouverture de coupe 3D</span><strong id="valCutAngle">180°</strong></label>
+            <input id="slCutAngle" type="range" min="0" max="270" step="5" value="180" />
+          </div>
+          <div class="slider-row">
+            <label><span>Vue éclatée</span><strong id="valExplode">0%</strong></label>
+            <input id="slExplode" type="range" min="0" max="100" step="2" value="0" />
+          </div>
+        </div>
+
+        <div class="layers-row">
+          <button data-layer="concrete" class="layer-btn on">Béton</button>
+          <button data-layer="wood" class="layer-btn on">Boîte bois</button>
+          <button data-layer="speaker" class="layer-btn on">DALI K-60</button>
+          <button data-layer="grille" class="layer-btn on">Grille</button>
+          <button data-layer="labels" class="layer-btn on">Cotes</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-bottom">
+      <div class="card">
+        <h2>Nomenclature &amp; Vérifications Techniques (DALI PHANTOM K-60 Rev H)</h2>
+        <table>
+          <thead>
+            <tr><th>Composant</th><th>Dimensions</th><th>Détail de mise en œuvre</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Découpe feuillure béton</td>
+              <td><code>Ø 223 mm × 50 mm</code></td>
+              <td>Collerette K-60 <code>Ø 242 mm</code> + grille aimantée <code>Ø 265 × 6 mm</code> en sous-face.</td>
+            </tr>
+            <tr>
+              <td>4 pattes <em>dogleg</em> K-60</td>
+              <td>Plage <code>29 – 65 mm</code></td>
+              <td><strong>Retourner les 4 pattes</strong> sur leurs vis avant pose (manuel DALI § 4.1) pour serrer les <code>50 mm</code> de béton.</td>
+            </tr>
+            <tr>
+              <td>Enceinte + réserve fond</td>
+              <td><code>102 + 80 = 182 mm</code></td>
+              <td>8 cm libres derrière l'aimant ; laine acoustique (Dacron) sous le couvercle supérieur.</td>
+            </tr>
+            <tr>
+              <td>Boîte cylindrique bois</td>
+              <td><code>H int 132 mm</code> + fond <code>18 mm</code></td>
+              <td>CP marine CTBX / MDF hydrofuge résiné époxy, posée à <code>Z = 50 mm</code> (reste <code>150 mm</code> de béton au-dessus).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Téléchargement direct des fichiers CAO 3D &amp; CNC (dynamiques)</h2>
+        <div class="dl-grid">
+          <button type="button" data-dl="stl-all">📦 Assemblage complet (.STL)</button>
+          <button type="button" data-dl="obj-all">📐 Assemblage multi-objets (.OBJ)</button>
+          <button type="button" data-dl="stl-beton">🧱 01 Plafond béton + feuillure (.STL)</button>
+          <button type="button" data-dl="stl-bois">🪵 02 Boîte bois cylindrique (.STL)</button>
+          <button type="button" data-dl="stl-k60">🔊 03 Enceinte DALI K-60 (.STL)</button>
+          <button type="button" data-dl="stl-grille">⚪ 04 Grille magnétique (.STL)</button>
+          <button type="button" data-dl="scad">⚙️ Script paramétrique (.SCAD)</button>
+          <button type="button" data-dl="dxf">📏 Coupe 2D &amp; usinage CNC (.DXF)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    const state = {
+      slabThickness: 350, slabWidth: 580, cutoutDia: 223,
+      grilleDia: 265, grilleProtrusion: 6, bezelDia: 242, bezelThick: 4,
+      basketDia: 217, mountingDepth: 102, conduitDia: 25,
+      woodInnerDia: 300, rearClearance: 80, rebateThick: 50, woodThick: 18,
+      cutAngleDeg: 180, explodePct: 0, viewMode: 'cut3d',
+      layers: { concrete: true, wood: true, speaker: true, grille: true, labels: true },
+      yaw: -0.62, pitch: 0.28, dist: 880, panX: 0, panY: 155
+    };
+
+    document.getElementById('btnTheme').addEventListener('click', () => {
+      const root = document.documentElement;
+      root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+      render();
+    });
+
+    function mat4Perspective(fovRad, aspect, near, far) {
+      const f = 1.0 / Math.tan(fovRad / 2), nf = 1 / (near - far);
+      return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,(2*far*near)*nf,0]);
+    }
+    const vSub = (a,b) => [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
+    const vCross = (a,b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+    const vNorm = (a) => { const l = Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; };
+    function mat4LookAt(eye, target, up) {
+      const z = vNorm(vSub(eye, target)), x = vNorm(vCross(up, z)), y = vCross(z, x);
+      return new Float32Array([
+        x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0,
+        -(x[0]*eye[0]+x[1]*eye[1]+x[2]*eye[2]),
+        -(y[0]*eye[0]+y[1]*eye[1]+y[2]*eye[2]),
+        -(z[0]*eye[0]+z[1]*eye[1]+z[2]*eye[2]), 1
+      ]);
+    }
+    function mat4Mul(a, b) {
+      const out = new Float32Array(16);
+      for (let c=0;c<4;c++) for (let r=0;r<4;r++)
+        out[c*4+r] = a[r]*b[c*4] + a[4+r]*b[c*4+1] + a[8+r]*b[c*4+2] + a[12+r]*b[c*4+3];
+      return out;
+    }
+    function projectPoint(mvp, wx, wy, wz, w, h) {
+      const gx = wx, gy = wz, gz = -wy;
+      const cx = mvp[0]*gx + mvp[4]*gy + mvp[8]*gz + mvp[12];
+      const cy = mvp[1]*gx + mvp[5]*gy + mvp[9]*gz + mvp[13];
+      const cw = mvp[3]*gx + mvp[7]*gy + mvp[11]*gz + mvp[15];
+      if (cw <= 1e-3) return null;
+      return { x: (cx/cw*0.5+0.5)*w, y: (-cy/cw*0.5+0.5)*h };
+    }
+
+    const canvas = document.getElementById('glCanvas');
+    const gl = canvas.getContext('webgl', { antialias: true, alpha: true });
+    const vsSource = `
+      attribute vec3 aPos; attribute vec3 aNorm; attribute vec3 aCol; attribute float aMatId;
+      uniform mat4 uMVP;
+      varying vec3 vNorm; varying vec3 vCol; varying vec3 vWorld; varying float vMatId;
+      void main() {
+        vec3 glPos = vec3(aPos.x, aPos.z, -aPos.y);
+        vWorld = aPos; vNorm = normalize(vec3(aNorm.x, aNorm.z, -aNorm.y));
+        vCol = aCol; vMatId = aMatId;
+        gl_Position = uMVP * vec4(glPos, 1.0);
+      }`;
+    const fsSource = `
+      precision highp float;
+      varying vec3 vNorm; varying vec3 vCol; varying vec3 vWorld; varying float vMatId;
+      uniform vec3 uEyeGL;
+      float hash(vec3 p) { return fract(sin(dot(p, vec3(12.9898,78.233,37.719)))*43758.5453); }
+      void main() {
+        vec3 N = normalize(vNorm); if (!gl_FrontFacing) N = -N;
+        vec3 base = vCol;
+        if (abs(vMatId - 1.0) < 0.2) {
+          base += vec3(hash(floor(vWorld * 0.85)) * 0.055 - 0.027);
+        } else if (abs(vMatId - 2.0) < 0.2) {
+          float ring = smoothstep(0.88, 0.98, abs(sin(vWorld.z * 3.14159 / 19.0)));
+          float grain = sin(vWorld.x * 0.12 + vWorld.y * 0.12 + vWorld.z * 0.45) * 0.035;
+          base = mix(base + grain, base * 0.78, ring * 0.45);
+        } else if (abs(vMatId - 4.0) < 0.2) {
+          if (vWorld.z < -4.5 && sin(vWorld.x * 2.4) * sin(vWorld.y * 2.4) > 0.35) base *= 0.76;
+        } else if (abs(vMatId - 5.0) < 0.2) {
+          float r = length(vWorld.xy - vec2(0.0, 10.0));
+          float fib = sin(r * 1.4 + atan(vWorld.y - 10.0, vWorld.x) * 14.0) * 0.03;
+          base += vec3(fib, fib * 0.5, fib * 0.4);
+        }
+        vec3 L1 = normalize(vec3(0.52,0.72,0.46)), L2 = normalize(vec3(-0.65,0.25,0.58)), L3 = normalize(vec3(0.0,-0.85,0.42));
+        vec3 V = normalize(uEyeGL - vec3(vWorld.x, vWorld.z, -vWorld.y));
+        float specPow = (abs(vMatId - 6.0) < 0.2) ? 48.0 : 22.0;
+        float specAmp = (abs(vMatId - 6.0) < 0.2) ? 0.42 : ((abs(vMatId - 1.0) < 0.2) ? 0.05 : 0.15);
+        float spec = pow(max(dot(N, normalize(L1 + V)), 0.0), specPow) * specAmp;
+        vec3 lit = base * (0.34 + 0.10*N.y + 0.54*max(dot(N,L1),0.0) + 0.24*max(dot(N,L2),0.0) + 0.16*max(dot(N,L3),0.0)) + vec3(spec);
+        gl_FragColor = vec4(clamp(lit, 0.0, 1.0), 1.0);
+      }`;
+    function compile(t, s) { const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh); return sh; }
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSource));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fsSource));
+    gl.linkProgram(prog); gl.useProgram(prog);
+    const locPos = gl.getAttribLocation(prog,'aPos'), locNorm = gl.getAttribLocation(prog,'aNorm');
+    const locCol = gl.getAttribLocation(prog,'aCol'), locMatId = gl.getAttribLocation(prog,'aMatId');
+    const locMVP = gl.getUniformLocation(prog,'uMVP'), locEyeGL = gl.getUniformLocation(prog,'uEyeGL');
+    const vbo = gl.createBuffer();
+    let vertexCount = 0, currentExportParts = {};
+
+    function buildGeometry() {
+      const verts = [];
+      const exportParts = { Plafond_Beton: [], Boite_Bois: [], Enceinte_DALI_K60: [], Grille_K60: [] };
+      const explode = state.explodePct / 100.0;
+      const zOffWood = explode * 210, zOffSpeaker = -explode * 155, zOffGrille = -explode * 255;
+
+      function pushTri(p0, p1, p2, col, matId, bucket) {
+        const ux=p1[0]-p0[0], uy=p1[1]-p0[1], uz=p1[2]-p0[2];
+        const vx=p2[0]-p0[0], vy=p2[1]-p0[1], vz=p2[2]-p0[2];
+        let nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+        const nl = Math.hypot(nx,ny,nz); if (nl < 1e-8) return;
+        nx/=nl; ny/=nl; nz/=nl;
+        for (const p of [p0,p1,p2]) verts.push(p[0],p[1],p[2], nx,ny,nz, col[0],col[1],col[2], matId);
+        if (bucket) bucket.push([p0,p1,p2,[nx,ny,nz]]);
+      }
+      const pushQuad = (a,b,c,d,col,m,bk) => { pushTri(a,b,c,col,m,bk); pushTri(a,c,d,col,m,bk); };
+
+      const cutRad = (state.cutAngleDeg * Math.PI) / 180.0;
+      const hasCut = state.cutAngleDeg > 2;
+      const thStart = -Math.PI / 2 + cutRad / 2;
+      const thEnd = thStart + (2 * Math.PI - cutRad);
+
+      function revolveConvex(profRZ, segs, fullOnly, col, cutCol, matId, zOffset, bucket) {
+        const useCut = hasCut && !fullOnly;
+        const aStart = useCut ? thStart : 0, aEnd = useCut ? thEnd : 2*Math.PI;
+        const steps = Math.max(12, Math.round(segs * ((aEnd - aStart) / (2*Math.PI))));
+        const m = profRZ.length, pt = (r,z,a) => [r*Math.cos(a), r*Math.sin(a), z+zOffset];
+        for (let i=0;i<steps;i++) {
+          const a0 = aStart + (aEnd-aStart)*(i/steps);
+          const a1 = (!useCut && i===steps-1) ? aStart : aStart + (aEnd-aStart)*((i+1)/steps);
+          for (let j=0;j<m;j++) {
+            const [r0,z0]=profRZ[j], [r1,z1]=profRZ[(j+1)%m];
+            if (r0<1e-5 && r1<1e-5) continue;
+            const p00=pt(r0,z0,a0), p10=pt(r0,z0,a1), p11=pt(r1,z1,a1), p01=pt(r1,z1,a0);
+            if (r0<1e-5) pushTri(p00,p11,p01,col,matId,bucket);
+            else if (r1<1e-5) pushTri(p00,p10,p11,col,matId,bucket);
+            else pushQuad(p00,p10,p11,p01,col,matId,bucket);
+          }
+        }
+        if (useCut) {
+          let cr=0, cz=0; for (const [r,z] of profRZ){cr+=r;cz+=z;} cr/=m; cz/=m;
+          const cs=pt(cr,cz,aStart), ce=pt(cr,cz,aEnd);
+          for (let j=0;j<m;j++) {
+            const [r0,z0]=profRZ[j], [r1,z1]=profRZ[(j+1)%m];
+            pushTri(cs,pt(r1,z1,aStart),pt(r0,z0,aStart),cutCol,matId,bucket);
+            pushTri(ce,pt(r0,z0,aEnd),pt(r1,z1,aEnd),cutCol,matId,bucket);
+          }
+        }
+      }
+
+      function addBox(cx,cy,cz,sx,sy,sz,rotZ,col,matId,bucket) {
+        const hx=sx/2,hy=sy/2,hz=sz/2, c=Math.cos(rotZ), s=Math.sin(rotZ);
+        const loc = [[-hx,-hy,-hz],[hx,-hy,-hz],[hx,hy,-hz],[-hx,hy,-hz],[-hx,-hy,hz],[hx,-hy,hz],[hx,hy,hz],[-hx,hy,hz]]
+          .map(([x,y,z]) => [x*c-y*s+cx, x*s+y*c+cy, z+cz]);
+        pushQuad(loc[0],loc[3],loc[2],loc[1],col,matId,bucket); pushQuad(loc[4],loc[5],loc[6],loc[7],col,matId,bucket);
+        pushQuad(loc[0],loc[1],loc[5],loc[4],col,matId,bucket); pushQuad(loc[2],loc[3],loc[7],loc[6],col,matId,bucket);
+        pushQuad(loc[1],loc[2],loc[6],loc[5],col,matId,bucket); pushQuad(loc[3],loc[0],loc[4],loc[7],col,matId,bucket);
+      }
+
+      function addTiltedFrustum(center,tiltX,r0,z0,r1,z1,segs,col,matId,bucket) {
+        const ca=Math.cos(tiltX), sa=Math.sin(tiltX), prof=[[0,z0],[r0,z0],[r1,z1],[0,z1]];
+        const tf=(r,z,a)=>{ const lx=r*Math.cos(a),ly=r*Math.sin(a); return [lx*ca+z*sa+center[0], ly+center[1], -lx*sa+z*ca+center[2]]; };
+        for (let i=0;i<segs;i++) {
+          const a0=2*Math.PI*i/segs, a1=2*Math.PI*((i+1)%segs)/segs;
+          for (let j=0;j<4;j++) {
+            const [ra,za]=prof[j],[rb,zb]=prof[(j+1)%4]; if (ra<1e-5&&rb<1e-5) continue;
+            const p00=tf(ra,za,a0),p10=tf(ra,za,a1),p11=tf(rb,zb,a1),p01=tf(rb,zb,a0);
+            if (ra<1e-5) pushTri(p00,p11,p01,col,matId,bucket);
+            else if (rb<1e-5) pushTri(p00,p10,p11,col,matId,bucket);
+            else pushQuad(p00,p10,p11,p01,col,matId,bucket);
+          }
+        }
+      }
+
+      const halfW=state.slabWidth/2, rCut=state.cutoutDia/2, rWoodIn=state.woodInnerDia/2;
+      const rWoodOut=rWoodIn+state.woodThick, rCond=state.conduitDia/2;
+      const zRebate=state.rebateThick, zCavTop=state.mountingDepth+state.rearClearance;
+      const zWoodTop=Math.min(state.slabThickness-15, zCavTop+state.woodThick);
+
+      if (state.layers.concrete) {
+        const aStart=hasCut?thStart:0, aEnd=hasCut?thEnd:2*Math.PI;
+        const angles=[aStart];
+        for (let i=1;i<80;i++) angles.push(aStart+(aEnd-aStart)*(i/80));
+        angles.push(aEnd);
+        for (const cAng of [-3*Math.PI/4,-Math.PI/4,Math.PI/4,3*Math.PI/4,5*Math.PI/4,7*Math.PI/4,9*Math.PI/4])
+          if (cAng>aStart+1e-4 && cAng<aEnd-1e-4) angles.push(cAng);
+        angles.sort((a,b)=>a-b);
+        const rSq=(a)=>halfW/Math.max(Math.abs(Math.cos(a)),Math.abs(Math.sin(a)));
+        const ptC=(r,z,a)=>[r*Math.cos(a),r*Math.sin(a),z];
+        for (let i=0;i<angles.length-1;i++) {
+          const a0=angles[i], a1=angles[i+1]; if (a1-a0<1e-5) continue;
+          const rs0=rSq(a0), rs1=rSq(a1);
+          const p0=[[rCut,0],[rs0,0],[rs0,state.slabThickness],[rCond,state.slabThickness],[rCond,zWoodTop],[rWoodOut,zWoodTop],[rWoodOut,zRebate],[rCut,zRebate]];
+          const p1=[[rCut,0],[rs1,0],[rs1,state.slabThickness],[rCond,state.slabThickness],[rCond,zWoodTop],[rWoodOut,zWoodTop],[rWoodOut,zRebate],[rCut,zRebate]];
+          for (let j=0;j<p0.length;j++) {
+            const jn=(j+1)%p0.length;
+            pushQuad(ptC(p0[j][0],p0[j][1],a0),ptC(p1[j][0],p1[j][1],a1),ptC(p1[jn][0],p1[jn][1],a1),ptC(p0[jn][0],p0[jn][1],a0),[0.64,0.67,0.70],1.0,exportParts.Plafond_Beton);
+          }
+        }
+        if (hasCut) {
+          for (const [ang,flip] of [[aStart,true],[aEnd,false]]) {
+            const rs=rSq(ang), rG=[rCond,rCut,rWoodOut,rs], zG=[0,zRebate,zWoodTop,state.slabThickness];
+            for (const [ir,iz] of [[1,0],[2,0],[2,1],[0,2],[1,2],[2,2]]) {
+              const q00=ptC(rG[ir],zG[iz],ang), q10=ptC(rG[ir+1],zG[iz],ang), q11=ptC(rG[ir+1],zG[iz+1],ang), q01=ptC(rG[ir],zG[iz+1],ang);
+              if (flip) pushQuad(q00,q01,q11,q10,[0.55,0.58,0.62],1.0,exportParts.Plafond_Beton);
+              else pushQuad(q00,q10,q11,q01,[0.55,0.58,0.62],1.0,exportParts.Plafond_Beton);
+            }
+          }
+        }
+      }
+
+      if (state.layers.wood) {
+        revolveConvex([[rWoodIn,zRebate],[rWoodOut,zRebate],[rWoodOut,zWoodTop],[rWoodIn,zWoodTop]],72,false,[0.78,0.55,0.33],[0.70,0.47,0.26],2.0,zOffWood,exportParts.Boite_Bois);
+        revolveConvex([[rCond,zCavTop],[rWoodIn,zCavTop],[rWoodIn,zWoodTop],[rCond,zWoodTop]],72,false,[0.78,0.55,0.33],[0.70,0.47,0.26],2.0,zOffWood,exportParts.Boite_Bois);
+        if (state.rearClearance >= 35)
+          revolveConvex([[rCond+4,zCavTop-16],[rWoodIn-2,zCavTop-16],[rWoodIn-2,zCavTop],[rCond+4,zCavTop]],60,false,[0.90,0.89,0.84],[0.83,0.82,0.76],3.0,zOffWood,null);
+        revolveConvex([[rCond-2.5,zCavTop-4],[rCond,zCavTop-4],[rCond,state.slabThickness+14],[rCond-2.5,state.slabThickness+14]],36,false,[0.28,0.30,0.33],[0.22,0.24,0.27],3.0,zOffWood*0.4,null);
+      }
+
+      if (state.layers.speaker) {
+        const rBez=state.bezelDia/2, rBask=state.basketDia/2;
+        revolveConvex([[82,-4],[rBez,-4],[rBez,0],[110,0],[110,24],[84,24],[82,12]],64,true,[0.18,0.19,0.22],[0.18,0.19,0.22],3.0,zOffSpeaker,exportParts.Enceinte_DALI_K60);
+        revolveConvex([[84,24],[rBask,24],[rBask,34],[86,72],[68,72],[68,54],[84,24]],64,true,[0.18,0.19,0.22],[0.18,0.19,0.22],3.0,zOffSpeaker,exportParts.Enceinte_DALI_K60);
+        revolveConvex([[0,56],[62,56],[62,99],[58,102],[12,102],[12,94],[0,94]],56,true,[0.25,0.27,0.30],[0.25,0.27,0.30],6.0,zOffSpeaker,exportParts.Enceinte_DALI_K60);
+        addTiltedFrustum([0,10,16+zOffSpeaker],4*Math.PI/180,22,26,74,-5.5,48,[0.46,0.20,0.17],5.0,exportParts.Enceinte_DALI_K60);
+        addTiltedFrustum([0,10,36+zOffSpeaker],4*Math.PI/180,22,5.5,7,0,32,[0.16,0.14,0.14],3.0,exportParts.Enceinte_DALI_K60);
+        addTiltedFrustum([0,-32,4.5+zOffSpeaker],-6*Math.PI/180,21,0,18,12,32,[0.26,0.28,0.31],6.0,exportParts.Enceinte_DALI_K60);
+        addTiltedFrustum([0,-32,4.5+zOffSpeaker],-6*Math.PI/180,14,0,4,-5.2,28,[0.10,0.10,0.12],3.0,exportParts.Enceinte_DALI_K60);
+        addBox(-36,-32,3+zOffSpeaker,52,7,4,16*Math.PI/180,[0.52,0.55,0.58],6.0,exportParts.Enceinte_DALI_K60);
+        addBox(36,-32,3+zOffSpeaker,52,7,4,-16*Math.PI/180,[0.52,0.55,0.58],6.0,exportParts.Enceinte_DALI_K60);
+        const zClamp=Math.min(65,Math.max(9,state.rebateThick));
+        for (let k=0;k<4;k++) {
+          const ang=((45+90*k)*Math.PI)/180;
+          addBox(104*Math.cos(ang),104*Math.sin(ang),40+zOffSpeaker,11,13,72,ang,[0.26,0.28,0.31],3.0,exportParts.Enceinte_DALI_K60);
+          addBox(114*Math.cos(ang),114*Math.sin(ang),zClamp+10.5+zOffSpeaker,28,14,9,ang,[0.86,0.70,0.24],6.0,exportParts.Enceinte_DALI_K60);
+          addBox(121*Math.cos(ang),121*Math.sin(ang),zClamp+3+zOffSpeaker,13,14,6,ang,[0.86,0.70,0.24],6.0,exportParts.Enceinte_DALI_K60);
+        }
+      }
+
+      if (state.layers.grille) {
+        const rG=state.grilleDia/2, rIn=state.bezelDia/2+0.8;
+        revolveConvex([[0,-6],[rG,-6],[rG,-4.3],[0,-4.3]],72,false,[0.94,0.95,0.96],[0.84,0.86,0.89],4.0,zOffGrille,exportParts.Grille_K60);
+        revolveConvex([[rIn,-4.3],[rG,-4.3],[rG,0],[rIn,0]],72,false,[0.94,0.95,0.96],[0.84,0.86,0.89],4.0,zOffGrille,exportParts.Grille_K60);
+      }
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.DYNAMIC_DRAW);
+      vertexCount = verts.length / 10;
+      currentExportParts = exportParts;
+    }
+
+    const overlaySvg = document.getElementById('overlaySvg');
+    const blueprintSvg = document.getElementById('blueprintSvg');
+    const wrap = document.getElementById('viewportWrap');
+
+    function render() {
+      updateReadouts();
+      if (state.viewMode === '2d') {
+        canvas.classList.add('hidden'); overlaySvg.classList.add('hidden');
+        document.getElementById('legendBar').classList.add('hidden');
+        document.getElementById('hintBar').classList.add('hidden');
+        blueprintSvg.classList.remove('hidden');
+        renderBlueprint2D();
+        return;
+      }
+      canvas.classList.remove('hidden'); overlaySvg.classList.remove('hidden');
+      document.getElementById('legendBar').classList.remove('hidden');
+      document.getElementById('hintBar').classList.remove('hidden');
+      blueprintSvg.classList.add('hidden');
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = wrap.clientWidth || 720, h = wrap.clientHeight || 540;
+      if (canvas.width !== Math.round(w*dpr) || canvas.height !== Math.round(h*dpr)) {
+        canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
+      }
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.enable(gl.DEPTH_TEST);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      const cp=Math.cos(state.pitch), sp=Math.sin(state.pitch), cy=Math.cos(state.yaw), sy=Math.sin(state.yaw);
+      const target=[state.panX, state.panY, 0];
+      const eye=[target[0]+state.dist*cp*sy, target[1]+state.dist*sp, target[2]+state.dist*cp*cy];
+      const mvp = mat4Mul(mat4Perspective(33*Math.PI/180, w/h, 20, 4500), mat4LookAt(eye, target, [0,1,0]));
+
+      gl.useProgram(prog);
+      gl.uniformMatrix4fv(locMVP, false, mvp);
+      gl.uniform3f(locEyeGL, eye[0], eye[1], eye[2]);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+      gl.enableVertexAttribArray(locPos); gl.vertexAttribPointer(locPos,3,gl.FLOAT,false,40,0);
+      gl.enableVertexAttribArray(locNorm); gl.vertexAttribPointer(locNorm,3,gl.FLOAT,false,40,12);
+      gl.enableVertexAttribArray(locCol); gl.vertexAttribPointer(locCol,3,gl.FLOAT,false,40,24);
+      gl.enableVertexAttribArray(locMatId); gl.vertexAttribPointer(locMatId,1,gl.FLOAT,false,40,36);
+      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+
+      overlaySvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      if (!state.layers.labels || state.explodePct > 25) { overlaySvg.innerHTML = ''; return; }
+      const rCut=state.cutoutDia/2, rWoodIn=state.woodInnerDia/2, zCavTop=state.mountingDepth+state.rearClearance;
+      const pins = [
+        { anchor: [-state.slabWidth*0.42, 0, state.slabThickness*0.52], offset: [-20,-12], align:'end', text:`Plafond béton ${state.slabThickness} mm` },
+        { anchor: [-rCut-14, 0, state.rebateThick*0.5], offset: [-28,10], align:'end', text:`Feuillure béton ${state.rebateThick} mm (Ø ${state.cutoutDia})` },
+        { anchor: [121*Math.SQRT1_2, -121*Math.SQRT1_2, state.rebateThick+5], offset: [30,14], align:'start', text:`Patte dogleg sur feuillure` },
+        { anchor: [rWoodIn+state.woodThick*0.5, 0, (state.rebateThick+zCavTop)*0.55], offset: [26,-6], align:'start', text:`Boîte bois Ø int ${state.woodInnerDia} mm` },
+        { anchor: [0, 0, state.mountingDepth+state.rearClearance*0.5], offset: [36,-16], align:'start', text:`Vide arrière +${state.rearClearance} mm` }
+      ];
+      let html = '';
+      for (const p of pins) {
+        const sc = projectPoint(mvp, p.anchor[0], p.anchor[1], p.anchor[2], w, h);
+        if (!sc || sc.x<12 || sc.x>w-12 || sc.y<12 || sc.y>h-12) continue;
+        const lx = Math.max(10, Math.min(w-10, sc.x+p.offset[0]));
+        const ly = Math.max(18, Math.min(h-14, sc.y+p.offset[1]));
+        const bw = p.text.length * 6.5 + 14;
+        const bx = p.align === 'end' ? lx - bw : lx;
+        html += `<line x1="${sc.x}" y1="${sc.y}" x2="${lx}" y2="${ly}" stroke="var(--text)" stroke-opacity="0.5" stroke-dasharray="2,2"/>
+          <circle cx="${sc.x}" cy="${sc.y}" r="3.5" fill="var(--primary)" stroke="var(--bg)" stroke-width="1.3"/>
+          <rect x="${bx}" y="${ly-11}" width="${bw}" height="21" rx="5" fill="var(--bg)" fill-opacity="0.88" stroke="var(--border)"/>
+          <text x="${bx+7}" y="${ly+3.5}" fill="var(--text)" font-size="11.5" font-family="monospace">${p.text}</text>`;
+      }
+      overlaySvg.innerHTML = html;
+    }
+
+    function renderBlueprint2D() {
+      const w = wrap.clientWidth || 720, h = wrap.clientHeight || 540;
+      blueprintSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      const scale = Math.min((w - 170) / 560, (h - 80) / 395);
+      const cx = w * 0.5, yZero = h - 46;
+      const sx = (x) => cx + x * scale, sy = (z) => yZero - z * scale;
+      const halfW=260, rCut=state.cutoutDia/2, rWoodIn=state.woodInnerDia/2, rWoodOut=rWoodIn+state.woodThick, rCond=state.conduitDia/2;
+      const z1=state.rebateThick, zCav=state.mountingDepth+state.rearClearance, zTop=Math.min(state.slabThickness-15,zCav+state.woodThick), zSlab=state.slabThickness;
+
+      const dimV = (xMm,za,zb,lbl,side=1) => {
+        const x=sx(xMm), ya=sy(za), yb=sy(zb);
+        return `<line x1="${x}" y1="${ya}" x2="${x}" y2="${yb}" stroke="var(--primary)" stroke-width="1.3"/>
+          <line x1="${x-4}" y1="${ya}" x2="${x+4}" y2="${ya}" stroke="var(--primary)" stroke-width="1.3"/>
+          <line x1="${x-4}" y1="${yb}" x2="${x+4}" y2="${yb}" stroke="var(--primary)" stroke-width="1.3"/>
+          <text x="${x+side*7}" y="${(ya+yb)/2+4}" text-anchor="${side>0?'start':'end'}" fill="var(--text)" font-size="12" font-family="monospace">${lbl}</text>`;
+      };
+      const dimH = (xa,xb,zMm,lbl,yOff=-7) => {
+        const x1=sx(xa), x2=sx(xb), y=sy(zMm);
+        return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--primary)" stroke-width="1.3"/>
+          <line x1="${x1}" y1="${y-4}" x2="${x1}" y2="${y+4}" stroke="var(--primary)" stroke-width="1.3"/>
+          <line x1="${x2}" y1="${y-4}" x2="${x2}" y2="${y+4}" stroke="var(--primary)" stroke-width="1.3"/>
+          <text x="${(x1+x2)/2}" y="${y+yOff}" text-anchor="middle" fill="var(--text)" font-size="12" font-family="monospace">${lbl}</text>`;
+      };
+      const pathSide = (s) => `M ${sx(s*halfW)} ${sy(0)} L ${sx(s*rCut)} ${sy(0)} L ${sx(s*rCut)} ${sy(z1)} L ${sx(s*rWoodOut)} ${sy(z1)} L ${sx(s*rWoodOut)} ${sy(zTop)} L ${sx(s*rCond)} ${sy(zTop)} L ${sx(s*rCond)} ${sy(zSlab)} L ${sx(s*halfW)} ${sy(zSlab)} Z`;
+
+      blueprintSvg.innerHTML = `
+        <defs><pattern id="hb" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="var(--muted)" stroke-opacity="0.38" stroke-width="1"/>
+        </pattern></defs>
+        <path d="${pathSide(-1)}" fill="url(#hb)" stroke="var(--text)" stroke-opacity="0.7" stroke-width="1.4"/>
+        <path d="${pathSide(1)}" fill="url(#hb)" stroke="var(--text)" stroke-opacity="0.7" stroke-width="1.4"/>
+        <rect x="${sx(-rWoodOut)}" y="${sy(zTop)}" width="${(rWoodOut-rWoodIn)*scale}" height="${(zTop-z1)*scale}" fill="#c88d55" fill-opacity="0.75" stroke="#8f5c2c"/>
+        <rect x="${sx(rWoodIn)}" y="${sy(zTop)}" width="${(rWoodOut-rWoodIn)*scale}" height="${(zTop-z1)*scale}" fill="#c88d55" fill-opacity="0.75" stroke="#8f5c2c"/>
+        <rect x="${sx(-rWoodIn)}" y="${sy(zTop)}" width="${(rWoodIn-rCond)*scale}" height="${(zTop-zCav)*scale}" fill="#c88d55" fill-opacity="0.75" stroke="#8f5c2c"/>
+        <rect x="${sx(rCond)}" y="${sy(zTop)}" width="${(rWoodIn-rCond)*scale}" height="${(zTop-zCav)*scale}" fill="#c88d55" fill-opacity="0.75" stroke="#8f5c2c"/>
+        <rect x="${sx(-state.basketDia/2)}" y="${sy(72)}" width="${state.basketDia*scale}" height="${72*scale}" rx="2" fill="#2e3238" stroke="var(--text)"/>
+        <rect x="${sx(-62)}" y="${sy(102)}" width="${124*scale}" height="${30*scale}" rx="2" fill="#464b53" stroke="var(--text)"/>
+        <rect x="${sx(-state.bezelDia/2)}" y="${sy(0)}" width="${state.bezelDia*scale}" height="${4*scale}" fill="#23262b"/>
+        <rect x="${sx(-state.grilleDia/2)}" y="${sy(-3.5)}" width="${state.grilleDia*scale}" height="${2.5*scale}" fill="#f1f3f5" stroke="#868e96"/>
+        <rect x="${sx(-127.5)}" y="${sy(z1+8)}" width="${27.5*scale}" height="${8*scale}" fill="#dfb43b" stroke="#8c6d1f"/>
+        <rect x="${sx(100)}" y="${sy(z1+8)}" width="${27.5*scale}" height="${8*scale}" fill="#dfb43b" stroke="#8c6d1f"/>
+        ${dimV(-halfW-16, 0, zSlab, `${zSlab} mm (béton)`, -1)}
+        ${dimV(-rCut+14, 0, z1, `${z1} mm`, 1)}
+        ${dimV(0, 102, zCav, `+${state.rearClearance} mm`, 1)}
+        ${dimV(halfW+16, 0, 102, `102 mm (K-60)`, 1)}
+        ${dimV(halfW+16, zTop, zSlab, `${Math.round(zSlab-zTop)} mm`, 1)}
+        ${dimH(-rWoodIn, rWoodIn, zCav-22, `Ø int bois ${state.woodInnerDia} mm`, -6)}
+        ${dimH(-rCut, rCut, -22, `Découpe Ø ${state.cutoutDia} mm (Grille Ø 265)`, 15)}`;
+    }
+
+    function updateReadouts() {
+      document.getElementById('valWoodDia').textContent = `${state.woodInnerDia} mm`;
+      document.getElementById('valRearClear').textContent = `${state.rearClearance} mm`;
+      document.getElementById('valRebate').textContent = `${state.rebateThick} mm`;
+      document.getElementById('valWoodWall').textContent = `${state.woodThick} mm`;
+      document.getElementById('valCutAngle').textContent = `${state.cutAngleDeg}°`;
+      document.getElementById('valExplode').textContent = `${state.explodePct}%`;
+
+      const rCutDm=(state.cutoutDia/2)/100, hRebDm=state.rebateThick/100;
+      const rWoodDm=(state.woodInnerDia/2)/100, zCavTop=state.mountingDepth+state.rearClearance;
+      const hWoodDm=Math.max(0,(zCavTop-state.rebateThick)/100);
+      const netL = Math.max(0, Math.PI*rCutDm*rCutDm*hRebDm + Math.PI*rWoodDm*rWoodDm*hWoodDm - 1.80);
+      document.getElementById('volReadout').textContent = `${netL.toFixed(1).replace('.',',')} L`;
+      const volBar = document.getElementById('volBar');
+      volBar.style.width = `${Math.min(100, Math.max(4, (netL/50)*100)).toFixed(1)}%`;
+      const volStatus = document.getElementById('volStatus');
+      if (netL < 5.0) { volBar.style.background = 'var(--warning)'; volStatus.textContent = 'Sous le min. DALI (5 L)'; }
+      else if (Math.abs(netL - 15.0) <= 2.0) { volBar.style.background = 'var(--success)'; volStatus.textContent = 'Optimum DALI atteint (~15 L)'; }
+      else { volBar.style.background = 'var(--success)'; volStatus.textContent = 'Conforme DALI (5–50 L, opt. 15 L)'; }
+      document.getElementById('concreteTopReadout').textContent = `Béton haut : ${Math.round(state.slabThickness - (zCavTop + state.woodThick))} mm`;
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+    function exportStlTris(tris, filename) {
+      const buf = new ArrayBuffer(84 + tris.length * 50), dv = new DataView(buf);
+      const hdr = `DALI K-60 Dint=${state.woodInnerDia}mm`;
+      for (let i=0;i<80;i++) dv.setUint8(i, i<hdr.length?hdr.charCodeAt(i):32);
+      dv.setUint32(80, tris.length, true);
+      let off = 84;
+      for (const [p0,p1,p2,n] of tris) {
+        for (const v of [n,p0,p1,p2]) { dv.setFloat32(off,v[0],true); dv.setFloat32(off+4,v[1],true); dv.setFloat32(off+8,v[2],true); off+=12; }
+        dv.setUint16(off,0,true); off+=2;
+      }
+      downloadBlob(new Blob([buf],{type:'model/stl'}), filename);
+    }
+    function exportObjAll() {
+      let lines=['# Assemblage 3D DALI PHANTOM K-60 (mm)'], vIdx=1;
+      for (const [name, tris] of Object.entries(currentExportParts)) {
+        if (!tris.length) continue; lines.push(`o ${name}`);
+        for (const [p0,p1,p2] of tris) {
+          lines.push(`v ${p0[0].toFixed(3)} ${p0[1].toFixed(3)} ${p0[2].toFixed(3)}`);
+          lines.push(`v ${p1[0].toFixed(3)} ${p1[1].toFixed(3)} ${p1[2].toFixed(3)}`);
+          lines.push(`v ${p2[0].toFixed(3)} ${p2[1].toFixed(3)} ${p2[2].toFixed(3)}`);
+          lines.push(`f ${vIdx} ${vIdx+1} ${vIdx+2}`); vIdx+=3;
+        }
+      }
+      downloadBlob(new Blob([lines.join('\n')],{type:'text/plain'}), `dali_k60_encastrement_${state.woodInnerDia}mm.obj`);
+    }
+    function exportScad() {
+      const zCav = state.mountingDepth + state.rearClearance;
+      const scad = `// OpenSCAD — Encastrement DALI PHANTOM K-60 (mm)\n$fn = 120;\nep_beton = ${state.slabThickness};\nep_feuillure = ${state.rebateThick};\nd_decoupe = ${state.cutoutDia};\nd_int_bois = ${state.woodInnerDia};\nep_bois = ${state.woodThick};\nz_cav = ${zCav};\n\ndifference() {\n  union() {\n    color([0.68,0.70,0.72]) difference() {\n      translate([-300,-300,0]) cube([600,600,ep_beton]);\n      translate([0,0,-1]) cylinder(d=d_decoupe, h=ep_feuillure+2);\n      translate([0,0,ep_feuillure]) cylinder(d=d_int_bois+2*ep_bois, h=z_cav+ep_bois-ep_feuillure);\n      translate([0,0,z_cav]) cylinder(d=25, h=ep_beton);\n    }\n    color([0.78,0.55,0.33]) difference() {\n      translate([0,0,ep_feuillure]) cylinder(d=d_int_bois+2*ep_bois, h=z_cav+ep_bois-ep_feuillure);\n      translate([0,0,ep_feuillure-1]) cylinder(d=d_int_bois, h=z_cav-ep_feuillure+1);\n      translate([0,0,z_cav-1]) cylinder(d=25, h=ep_bois+2);\n    }\n  }\n  translate([-400,-400,-20]) cube([800,400,ep_beton+40]);\n}\n`;
+      downloadBlob(new Blob([scad],{type:'text/plain'}), `dali_k60_${state.woodInnerDia}mm.scad`);
+    }
+    function exportDxf() {
+      const rIn = state.woodInnerDia/2, rOut = rIn + state.woodThick, rCond = state.conduitDia/2;
+      const dxf = ['0','SECTION','2','ENTITIES',
+        '0','CIRCLE','8','ANNEAU_BOIS','10','0','20','0','30','0','40',rOut.toFixed(2),
+        '0','CIRCLE','8','ANNEAU_BOIS','10','0','20','0','30','0','40',rIn.toFixed(2),
+        '0','CIRCLE','8','FOND_BOIS','10',(rOut*2.5).toFixed(2),'20','0','30','0','40',rOut.toFixed(2),
+        '0','CIRCLE','8','FOND_BOIS','10',(rOut*2.5).toFixed(2),'20','0','30','0','40',rCond.toFixed(2),
+        '0','CIRCLE','8','DECOUPE_BETON','10','0','20',(rOut*2.5).toFixed(2),'30','0','40',(state.cutoutDia/2).toFixed(2),
+        '0','ENDSEC','0','EOF'].join('\n');
+      downloadBlob(new Blob([dxf],{type:'application/dxf'}), `usinage_cnc_dali_k60_${state.woodInnerDia}mm.dxf`);
+    }
+    document.getElementById('btnExportSTL').addEventListener('click', () => {
+      exportStlTris([...currentExportParts.Plafond_Beton, ...currentExportParts.Boite_Bois, ...currentExportParts.Enceinte_DALI_K60, ...currentExportParts.Grille_K60], `dali_k60_encastrement_${state.woodInnerDia}mm.stl`);
+    });
+    document.getElementById('btnExportOBJ').addEventListener('click', exportObjAll);
+    document.querySelectorAll('[data-dl]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const k = btn.dataset.dl;
+        if (k === 'stl-all') exportStlTris([...currentExportParts.Plafond_Beton, ...currentExportParts.Boite_Bois, ...currentExportParts.Enceinte_DALI_K60, ...currentExportParts.Grille_K60], `assemblage_dali_k60_${state.woodInnerDia}mm.stl`);
+        else if (k === 'obj-all') exportObjAll();
+        else if (k === 'stl-beton') exportStlTris(currentExportParts.Plafond_Beton, `01_plafond_beton_feuillure_${state.rebateThick}mm.stl`);
+        else if (k === 'stl-bois') exportStlTris(currentExportParts.Boite_Bois, `02_boite_bois_${state.woodInnerDia}mm.stl`);
+        else if (k === 'stl-k60') exportStlTris(currentExportParts.Enceinte_DALI_K60, `03_enceinte_dali_k60.stl`);
+        else if (k === 'stl-grille') exportStlTris(currentExportParts.Grille_K60, `04_grille_k60.stl`);
+        else if (k === 'scad') exportScad();
+        else if (k === 'dxf') exportDxf();
+      });
+    });
+
+    let dragging=false, lastX=0, lastY=0, shiftDrag=false;
+    canvas.addEventListener('pointerdown',(e)=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; shiftDrag=e.shiftKey||e.button!==0; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove',(e)=>{
+      if (!dragging) return;
+      const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
+      if (shiftDrag||e.shiftKey) { state.panX-=dx*0.65; state.panY+=dy*0.65; }
+      else { state.yaw-=dx*0.0085; state.pitch=Math.max(-1.48,Math.min(1.48,state.pitch+dy*0.0085)); }
+      render();
+    });
+    canvas.addEventListener('pointerup',()=>{ dragging=false; });
+    canvas.addEventListener('contextmenu',(e)=>e.preventDefault());
+    canvas.addEventListener('wheel',(e)=>{ e.preventDefault(); state.dist=Math.max(320,Math.min(1850,state.dist*(1+e.deltaY*0.001))); render(); },{passive:false});
+
+    function setModeBtn(id) {
+      for (const b of ['btnModeCut3D','btnModeFull3D','btnModeExploded','btnModeBelow','btnMode2D'])
+        document.getElementById(b).classList.toggle('active', b === id);
+    }
+    document.getElementById('btnModeCut3D').addEventListener('click',()=>{ state.viewMode='cut3d'; state.cutAngleDeg=180; state.explodePct=0; state.yaw=-0.62; state.pitch=0.28; state.dist=880; state.panX=0; state.panY=155; document.getElementById('slCutAngle').value=180; document.getElementById('slExplode').value=0; setModeBtn('btnModeCut3D'); buildGeometry(); render(); });
+    document.getElementById('btnModeFull3D').addEventListener('click',()=>{ state.viewMode='full3d'; state.cutAngleDeg=0; state.explodePct=0; state.yaw=-0.65; state.pitch=0.42; state.dist=940; state.panX=0; state.panY=155; document.getElementById('slCutAngle').value=0; document.getElementById('slExplode').value=0; setModeBtn('btnModeFull3D'); buildGeometry(); render(); });
+    document.getElementById('btnModeExploded').addEventListener('click',()=>{ state.viewMode='exploded'; state.cutAngleDeg=150; state.explodePct=78; state.yaw=-0.58; state.pitch=0.22; state.dist=1280; state.panX=0; state.panY=140; document.getElementById('slCutAngle').value=150; document.getElementById('slExplode').value=78; setModeBtn('btnModeExploded'); buildGeometry(); render(); });
+    document.getElementById('btnModeBelow').addEventListener('click',()=>{ state.viewMode='below'; state.cutAngleDeg=0; state.explodePct=0; state.yaw=-0.35; state.pitch=-0.95; state.dist=680; state.panX=0; state.panY=20; document.getElementById('slCutAngle').value=0; document.getElementById('slExplode').value=0; setModeBtn('btnModeBelow'); buildGeometry(); render(); });
+    document.getElementById('btnMode2D').addEventListener('click',()=>{ state.viewMode='2d'; setModeBtn('btnMode2D'); render(); });
+
+    document.getElementById('btnPreset300').addEventListener('click',()=>{ state.woodInnerDia=300; state.rearClearance=80; state.rebateThick=50; state.woodThick=18; document.getElementById('slWoodDia').value=300; document.getElementById('slRearClear').value=80; document.getElementById('slRebate').value=50; document.getElementById('slWoodWall').value=18; buildGeometry(); render(); });
+    document.getElementById('btnPreset380').addEventListener('click',()=>{ state.woodInnerDia=380; state.rearClearance=80; state.rebateThick=50; state.woodThick=18; document.getElementById('slWoodDia').value=380; document.getElementById('slRearClear').value=80; document.getElementById('slRebate').value=50; document.getElementById('slWoodWall').value=18; buildGeometry(); render(); });
+
+    for (const [id,prop] of [['slWoodDia','woodInnerDia'],['slRearClear','rearClearance'],['slRebate','rebateThick'],['slWoodWall','woodThick'],['slCutAngle','cutAngleDeg'],['slExplode','explodePct']]) {
+      document.getElementById(id).addEventListener('input',(e)=>{ state[prop]=parseFloat(e.target.value); buildGeometry(); render(); });
+    }
+    document.querySelectorAll('.layer-btn').forEach((btn)=>{
+      btn.addEventListener('click',()=>{ const k=btn.dataset.layer; state.layers[k]=!state.layers[k]; btn.classList.toggle('on',state.layers[k]); buildGeometry(); render(); });
+    });
+    window.addEventListener('resize', render);
+    buildGeometry(); render();
+  })();
+  </script>
+</body>
+</html>
